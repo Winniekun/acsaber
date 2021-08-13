@@ -1,4 +1,19 @@
-# Wkk' 算法整理
+# Wkk's 算法整理
 
-> hello :japanese_goblin:
+> twinkle twinle one more star :star:
 
+### 基础
+
+* [ ] 常用数据结构
+* [ ] 二分
+* [ ] 位运算
+* [ ] 树
+* [ ] 搜索
+* [ ] 动态规划
+* [ ] 贪心
+
+### 进阶
+
+* [ ] 动归进阶版
+* [ ] 搜索
+* [ ] 图论
