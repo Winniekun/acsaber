@@ -1,5 +1,5 @@
-* [测试](/everyday/aaa)
-* [测试2](bbb)
+* [AcWing 每日一题](ac)
+* [LeetCode 每日一题](lc)
 
 
 
