@@ -4,5 +4,6 @@
 * [基础数据结构](/datastructure/README)
 * [DFS](/dfs/README)
 * [BFS](/bfs/README)
+* [高频应用算法](high/README)
 * [周赛](/weekcompetition/README)
 

@@ -78,3 +78,56 @@ class Solution {
 
 
 
+### [526. 优美的排列](https://leetcode-cn.com/problems/beautiful-arrangement/)
+
+**题目：**
+
+```java
+假设有从 1 到 N 的 N 个整数，如果从这 N 个数字中成功构造出一个数组，使得数组的第 i 位 (1 <= i <= N) 满足如下两个条件中的一个，我们就称这个数组为一个优美的排列。条件：
+
+第 i 位的数字能被 i 整除
+i 能被第 i 位上的数字整除
+现在给定一个整数 N，请问可以构造多少个优美的排列？
+
+N < 16
+```
+
+**思路：**
+
+1. 求所有的可能性，最先想到的是加回溯的dfs，题目直白理解：N的数字放入到N个槽位，然后并且要符合优美排列规则
+   1. 从位置1开始，每个位置都有都有n中可能，然后一次递归需要标记元素是否访问，保持递归内数据一致，使用一个boolean[] 数组记录
+   2. 根据上述，得出入参两个，当前所在位置，标记数组，最后再添加一个长度，用于做终止条件判断
+
+**题解：**
+
+```java
+class Solution {
+    int res = 0;
+    public int countArrangement(int N) {
+        boolean[] flag = new boolean[N + 1];
+        helper(flag, N, 1);
+        return res;
+    }
+
+    private void helper(boolean[] flag, int N, int count) {
+        if (count == N + 1) {
+            res++;
+            return;
+        }
+        for (int i = 1; i <= N; i++) {
+            // 已经被使用了
+            if (flag[i]) continue;
+            //剪枝条件：如果不能被i或整除i
+            if (!judge(count, i)) continue;
+            flag[i] = true;
+            helper(flag, N, count + 1);
+            flag[i] = false;
+        }
+    }
+
+    private boolean judge(int num, int idx) {
+        return (num % idx == 0) || (idx % num == 0);
+    }
+}
+```
+
