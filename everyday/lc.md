@@ -131,3 +131,183 @@ class Solution {
 }
 ```
 
+### [552. 学生出勤记录 II](https://leetcode-cn.com/problems/student-attendance-record-ii/)
+
+**题目：**
+
+```
+可以用字符串表示一个学生的出勤记录，其中的每个字符用来标记当天的出勤情况（缺勤、迟到、到场）。记录中只含下面三种字符：
+'A'：Absent，缺勤
+'L'：Late，迟到
+'P'：Present，到场
+如果学生能够 同时 满足下面两个条件，则可以获得出勤奖励：
+按总出勤计，学生缺勤（'A'）严格 少于两天。
+学生不会存在连续3天或连续3天以上的迟到（'L'）记录。
+给你一个整数 n ，表示出勤记录的长度（次数）。请你返回记录长度为 n 时，可能获得出勤奖励的记录情况 数量 。答案可能很大，所以返回对 109 + 7 取余 的结果。
+
+示例 1：
+> 输入：n = 2
+> 输出：8
+> 解释：
+> 有 8 种长度为 2 的记录将被视为可奖励：
+> "PP" , "AP", "PA", "LP", "PL", "AL", "LA", "LL" 
+> 只有"AA"不会被视为可奖励，因为缺勤次数为 2 次（需要少于 2 次）。
+
+示例 2：
+> 输入：n = 1
+> 输出：3
+
+示例 3：
+> 输入：n = 10101
+> 输出：183236316
+```
+
+**思路：**
+
+趁着这道题，整理下怎么通过dfs一步一步进化到动归的思路吧
+
+1. dfs
+   1. 因为求所有的结果，根据题目的意思就是， 将`P`、`L`
+2. 记忆化dfs
+3. 根据dfs定义以及入参和计算方式，延伸出动归的定义，以及状态方程
+4. 优化 滚动数组。。。 不写了
+
+**题解：**
+
+```java
+// dfs
+public int checkRecordI(int n) {
+    return dfsI(0, n, 0, 0);
+}
+private int dfsI(int day, int n, int absent, int late) {
+    if (day >= n) {
+        return 1;
+    }
+    int ans = 0;
+    ans = (ans + dfsI(day + 1, n, absent, 0)) % MOD;
+    if (absent < 1) {
+        ans = (ans + dfsI(day + 1, n, 1, 0)) % MOD;
+    }
+    if (late < 2) {
+        ans = (ans + dfsI(day + 1, n, absent, late + 1)) % MOD;
+    }
+    return ans;
+}
+
+// dfs + 记忆化
+public int checkRecord(int n) {
+    int[][][] memo = new int[n][2][3];
+    return dfs(0, n, 0, 0, memo);
+}
+private int dfs(int day, int n, int absent, int late, int[][][] memo) {
+    if (day >= n) {
+        return 1;
+    }
+    // 相同的状态计算过了直接返回
+    if (memo[day][absent][late] != 0) {
+        return memo[day][absent][late];
+    }
+    int ans = 0;
+    // present 随意放
+    ans = (ans + dfs(day + 1, n, absent, 0, memo)) % MOD;
+    // absent 只能放1个
+    if (absent < 1) {
+        ans = (ans + dfs(day + 1, n, 1, 0, memo)) % MOD;
+    }
+    // late 最多放连续的两个
+    if (late < 2) {
+        ans = (ans + dfs(day + 1, n, absent, late + 1, memo)) % MOD;
+    }
+    // 记录每一个状态的计算结果
+    memo[day][absent][late] = ans;
+    return ans;
+}
+
+// 动态规划
+public int checkRecordII(int n) {
+    long[][][] dp = new long[n][2][3];
+    // 初始值
+    dp[0][0][0] = 1;
+    dp[0][1][0] = 1;
+    dp[0][0][1] = 1;
+    for (int i = 1; i < n; i++) {
+        // 本次填入P，分成前一天累计了0个A和1个A两种情况
+        dp[i][0][0] = (dp[i - 1][0][0] + dp[i - 1][0][1] + dp[i - 1][0][2]) % MOD;
+        dp[i][1][0] = (dp[i - 1][1][0] + dp[i - 1][1][1] + dp[i - 1][1][2]) % MOD;
+        // 本次填入A，前一天没有累计A都能转移过来
+        // 这行可以与上面一行合并计算，为了方便理解，我们分开，下面会合并
+        dp[i][1][0] = (dp[i][1][0] + dp[i - 1][0][0] + dp[i - 1][0][1] + dp[i - 1][0][2]) % MOD;
+        // 本次填入L，前一天最多只有一个连续的L，分成四种情况
+        dp[i][0][1] = dp[i - 1][0][0];
+        dp[i][0][2] = dp[i - 1][0][1];
+        dp[i][1][1] = dp[i - 1][1][0];
+        dp[i][1][2] = dp[i - 1][1][1];
+    }
+    // 计算结果，即最后一天的所有状态相加
+    long ans = 0;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            ans = (ans + dp[n - 1][i][j]) % MOD;
+        }
+    }
+    return (int) ans;
+}
+```
+
+### [541. 反转字符串 II](https://leetcode-cn.com/problems/reverse-string-ii/)
+
+**题目：**
+
+```tex
+给定一个字符串 s 和一个整数 k，从字符串开头算起，每 2k 个字符反转前 k 个字符。
+
+如果剩余字符少于 k 个，则将剩余字符全部反转。
+如果剩余字符小于 2k 但大于或等于 k 个，则反转前 k 个字符，其余字符保持原样。
+```
+
+**思路：**
+
+字符串反转，基本功。
+
+根据题意：每$2k$个字符，交换前$k$个字符。所以使用双指针解决，然后需要注意更新双指针的方式。
+
+**题解：**
+
+```java
+class Solution {
+    public String reverseStr(String s, int k) {
+        char[] arr = s.toCharArray();
+        int i = 0;
+        int j = k - 1;
+        int n = arr.length;
+        int times = n / (2 * k);
+        while (times-- > 0) {
+            exchange(arr, i, j);
+            i = i + 2 * k;
+            j = i + k - 1 >= n ? n - 1 : i + k - 1;
+        }
+        int rst = n % (2 * k);
+        if (rst < k) {
+            exchange(arr, i,  i + rst - 1);
+        } else {
+            exchange(arr, i, i + k - 1);
+        }
+        return new String(arr);
+    }
+
+    private void exchange(char[] arr, int left, int right) {
+        while (left < right) {
+            swap(arr, left, right);
+            left++;
+            right--;
+        }
+    }
+
+    private void swap(char[] arr, int i, int j) {
+        char tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+}
+```
+
