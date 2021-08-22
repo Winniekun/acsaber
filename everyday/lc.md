@@ -311,3 +311,70 @@ class Solution {
 }
 ```
 
+### [789. 逃脱阻碍者](https://leetcode-cn.com/problems/escape-the-ghosts/)
+
+**题目：**
+
+```
+你在进行一个简化版的吃豆人游戏。你从 [0, 0] 点开始出发，你的目的地是 target = [xtarget, ytarget] 。地图上有一些阻碍者，以数组 ghosts 给出，第 i 个阻碍者从 ghosts[i] = [xi, yi] 出发。所有输入均为 整数坐标 。
+
+每一回合，你和阻碍者们可以同时向东，西，南，北四个方向移动，每次可以移动到距离原位置 1 个单位 的新位置。当然，也可以选择 不动 。所有动作 同时 发生。
+
+如果你可以在任何阻碍者抓住你 之前 到达目的地（阻碍者可以采取任意行动方式），则被视为逃脱成功。如果你和阻碍者同时到达了一个位置（包括目的地）都不算是逃脱成功。
+
+只有在你有可能成功逃脱时，输出 true ；否则，输出 false 。
+
+示例 1：
+
+输入：ghosts = [[1,0],[0,3]], target = [0,1]
+输出：true
+解释：你可以直接一步到达目的地 (0,1) ，在 (1, 0) 或者 (0, 3) 位置的阻碍者都不可能抓住你。 
+```
+
+**思路：**
+
+理解题目，做起来就简单了。
+
+![题目](https://cdn.jsdelivr.net/gh/Winniekun/cloudImg@master/uPic/image-20210822175220951.png)
+
+以上图为例。玩家初始点在$P$, 然后两个阻碍者分别为$G1、G2$，$T1、T2、T3$分别为三个目的地。$T1$能够安全到达，$T2、T3$就有不行。题目中明确说了，只能上下左右移动。所以我们只需要计算$G_i$到$T$的曼哈顿距离$D_i$和$P$到$T$的曼哈顿距离$D_p$。
+
+1. $Di < D_p$ 说明$G_i$会在比玩家更早到达终点$T$，所以$G_i$只需要在$T$等着就行，玩家无法逃脱
+2. $D_i > D_p $ 说明所有的$G_i$距离终点$T$都比玩家距离终点$T$远。玩家能够成功逃脱
+
+**曼哈顿距离**公式：$dist(p1, p2) = | x_1 - x_2 | + |y_1 - y_2 |$。
+
+那么，会不会存在，如果$G_1$到目的地的距离确实比玩家到目的地的距离远（$dist(g, t) > dist(p, t)$），但是$G_i$能拦截到$P$ ？ 我们证明下：
+
+假设拦截点为 X，看看会发生什么情况：
+
+1. 玩家到目的地的距离：$dist(p,t) = dist(p, x) + dist(x, t)$
+2. 鬼到目的地的距离：$dist(g,t) = dist(g, x) + dist(x, t)$ 
+3. 能拦截到说明：$dist(g, x) < dist(p, x)$
+4. 那么两边同时加上相同的值，有：$dist(g, x) + dist(x, t) < dist(p, x) + dist(x, t)$
+5. 最后，得出：$dist(g, t) < dist(p, t)$
+6. 这与题目我们假设的鬼到目的地的距离确实比玩家到目的地的距离远相悖了。
+
+**题解：**
+
+```java
+class Solution {
+    public boolean escapeGhosts(int[][] ghosts, int[] target) {
+        int baseDist = genDistance(new int[]{0, 0}, target);
+        for (int[] ghost : ghosts) {
+            int innerDist = genDistance(ghost, target);
+            if (innerDist <= baseDist) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int genDistance(int[] base, int[] target) {
+        return (int)(Math.abs(base[0] - target[0]) + Math.abs(base[1] - target[1]));
+    }
+}
+```
+
+
+
