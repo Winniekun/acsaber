@@ -363,3 +363,53 @@ public class Main {
 }
 ```
 
+### [3814. 矩阵变换](https://www.acwing.com/problem/content/3817/)
+
+**题目：**
+
+```
+给定一个 n×n 的 01 矩阵。
+
+你可以选择若干列（也可以不选），并将这些列上的所有元素进行变换（1 变 0，0 变 1）。
+
+你的目标是使得矩阵中有尽可能多的行满足：一行中的所有元素都为 1。
+
+输出可以得到的满足条件的行的最大数量。
+
+输入格式
+第一行包含整数 n。
+
+接下来 n 行，每行包含一个长度为 n 的 01 字符串，表示整个矩阵。
+
+输出格式
+输出可以得到的满足条件的行的最大数量。
+
+数据范围
+1≤n≤100
+```
+
+**思路：**
+
+最开始理解错了，看到数据量不大，直接模拟就行了。时间复杂度：$O(n^2)$，空间复杂度$O(n ^ 2)$，不过后面注意到是随机选取若干列。那么按照排列组合来看，时间复杂度$O(n!)$，突然感觉思路不对了。后面根据题意，自己草稿纸上算了算了个，emmm，这不就是字符串的词频统计。。。输出频率最高的即可:face_with_head_bandage:，做题还是先仔细的过过脑子，不要想当然！！！
+
+**题解：**
+
+```java
+import java.util.*;
+public class Main {
+    static Map<String, Integer> map = new HashMap<>();
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = Integer.parseInt(sc.nextLine());
+        int res = 1;
+        String line;
+        for (int i = 0; i < n; i++) {
+            line = sc.nextLine();
+            map.put(line, map.getOrDefault(line,0) +1);
+            res = Math.max(res, map.get(line));
+        }
+        System.out.println(res);
+    }
+}
+```
+

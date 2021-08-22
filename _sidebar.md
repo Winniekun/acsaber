@@ -2,8 +2,10 @@
 * [剑指Offer](/offer/README)
 * [每日一题](/everyday/README)
 * [基础数据结构](/datastructure/README)
+* [排序算法](/sort/README)
 * [DFS](/dfs/README)
 * [BFS](/bfs/README)
+* [DP](/dp/README)
 * [高频应用算法](high/README)
 * [周赛](/weekcompetition/README)
 
