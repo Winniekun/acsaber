@@ -1,3 +1,5 @@
+
+
 ## 2021年8月
 
 ### [1583. 统计不开心的朋友](https://leetcode-cn.com/problems/count-unhappy-friends/)
@@ -1127,3 +1129,95 @@ class Solution {
     }
 }
 ```
+
+### [29. 两数相除](https://leetcode-cn.com/problems/divide-two-integers/)
+
+**题目：**
+
+```
+给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
+
+返回被除数 dividend 除以除数 divisor 得到的商。
+
+整数除法的结果应当截去（truncate）其小数部分，例如：truncate(8.345) = 8 以及 truncate(-2.7335) = -2
+```
+
+**思路：**
+
+因为使用乘法、除法，所以为了达到和除法相同的结果，使用**快速幂**来做，同时因为寻找的过程本身就具有单调性，所以使用**二分优化**查询速度
+
+所以整体来看就是：**二分 + 快速幂**
+
+**题解：**
+
+```java
+class Solution {
+    public int divide(int dividend, int divisor) {
+        // 思路
+        // 二分 + 快速幂
+        long a = dividend;
+        long b = divisor;
+        boolean isNeg = a * b < 0;
+        a = Math.abs(a);
+        b = Math.abs(b);
+        
+        long l = 0;
+        long r = a;
+        while (l < r) {
+            long mid = l + r + 1 >> 1;
+            if (check(b, mid) > a) {
+                r = mid - 1;
+            } else {
+                l = mid;
+            }
+        }
+        // 返回结果
+        // 注意整型溢出
+        if (isNeg) {
+            l = -l;
+        }
+        int ans = l >= Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)l;
+        return ans;
+    }
+    
+    private long check(long a, long b) {
+        long sum = 0;
+        while (b != 0) {
+            if ((b & 1) == 1) {
+                sum += a;
+            }
+            a += a;
+            b >>= 1;
+        }
+        return sum;
+    }
+}
+```
+
+### [412. Fizz Buzz](https://leetcode-cn.com/problems/fizz-buzz/)
+
+**题目：**
+
+```
+给你一个整数 n ，找出从 1 到 n 各个整数的 Fizz Buzz 表示，并用字符串数组 answer（下标从 1 开始）返回结果，其中：
+
+answer[i] == "FizzBuzz" 如果 i 同时是 3 和 5 的倍数。
+answer[i] == "Fizz" 如果 i 是 3 的倍数。
+answer[i] == "Buzz" 如果 i 是 5 的倍数。
+answer[i] == i 如果上述条件全不满足。
+```
+
+**思路：**
+
+逻辑判断，注意判断顺序，可以用来练习Java stream
+
+**题解：**
+
+```java
+class Solution {
+    public List<String> fizzBuzz(int n) {
+        return IntStream.range(1, n + 1).mapToObj(num -> num % 15 == 0 ? "FizzBuzz" : num % 3 == 0 ? "Fizz" : num % 5 == 0 ? "Buzz" : String.valueOf(num)).collect(Collectors.toList());
+    } 
+}
+```
+
