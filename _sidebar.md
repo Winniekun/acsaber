@@ -6,6 +6,7 @@
 * [DFS](/dfs/README)
 * [BFS](/bfs/README)
 * [DP](/dp/README)
+* [Tree](/tree/README)
 * [高频应用算法](high/README)
 * [周赛](/weekcompetition/README)
 
