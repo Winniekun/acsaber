@@ -70,3 +70,85 @@ class Solution {
 }
 ```
 
+
+
+## 第438场周赛
+
+> 工作后第一正式打比赛，被锤的头疼，状态得慢慢找了
+
+### [100579. 判断操作后字符串中的数字是否相等 I](https://leetcode.cn/problems/check-if-digits-are-equal-in-string-after-operations-i/)
+
+**思路：**
+
+第一题暴力遍历就行了，注意过程中不要使用数字转字符串，不然导致结果为0的值直接被忽略了。
+
+**题解：**
+
+```java
+class Solution {
+   public static boolean hasSameDigits(String s) {
+        while (s.length() > 2) {
+            int n = s.length();
+            char[] charArray = s.toCharArray();
+            int j = 0;
+            int total = 0;
+            StringBuilder sb = new StringBuilder();
+            while (j < n - 1) {
+                char first = charArray[j];
+                char second = charArray[j + 1];
+                int val = ((first - '0') + (second - '0')) % 10;
+                sb.append(val);
+                j++;
+            }
+            s = sb.toString();
+        }
+        if (s.length() == 2) {
+            return s.charAt(0) == s.charAt(1) ? true : false;
+        } else {
+            return s.equals("0") ? true : false;
+        }
+    }
+}
+```
+
+
+
+
+
+### [100576. 提取至多 K 个元素的最大总和](https://leetcode.cn/problems/maximum-sum-with-at-most-k-elements/)
+
+**思路：**
+
+知道是贪心，但是最开始按照矩阵位置移动方向思考了（纯模拟），先对矩阵每行排序，最开始选择最大的元素，然后在其位置的上下左右斜对角8个方向找最值，然后当前位置置0，`limits[i] -=1`继续寻找，但是忽略一个细节
+
+- 如果存在大量重复的元素，由于元素选择存在不可控性，可能会导致漏选
+
+后面看了题解，直接贪心+排序就行了，方便取值可以使用优先队列进行维护取的值。
+
+**题解：**
+
+```java
+class Solution {
+    public long maxSum(int[][] grid, int[] limits, int k) {
+        // 贪心，limits[i] 拿完，然后取前k个就行, 使用大根堆
+        Queue<Integer> priorityQueue = new PriorityQueue<>((a, b) -> b - a);
+        for (int i = 0; i < grid.length; i++) {
+            int[] cur = grid[i];
+            Arrays.sort(cur);
+            for (int j = cur.length - limits[i]; j < cur.length; j++) {
+                priorityQueue.offer(cur[j]);
+            }
+        }
+        long res = 0;
+        while (k > 0) {
+            if (!priorityQueue.isEmpty()) {
+                res += priorityQueue.poll();
+            }
+            k--;
+            
+        }
+        return res;
+    }
+}
+```
+
