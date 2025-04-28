@@ -1,0 +1,325 @@
+## 时间序列模型
+
+### [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber) :white_check_mark:
+
+> 时间序列模型：其中每一个元素可以认为一天，并且**今天**的状态只取决于**昨天**的状态
+>
+> 1. 定于状态$dp[i][j]$ 表示第i家，偷或不偷 $j\in \{0,1\}, i \in \{N_i\}$
+>
+> 2. 转移方程
+>
+>    <img src="https://i.loli.net/2021/05/03/mJ1etinXxgrUDVh.png" alt="image-20210503151927577" style="zoom:50%;" />
+>
+>    * $ dp[i][j]=\left\{ \begin{array}{rcl} dp[i][0]= dp[i-1][1] + val[i] && {偷}\\ dp[i][1]=Math.max(dp[i-1][0], dp[i-1][1]) &&{不偷}\end{array} \right. $
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        // 0 偷
+        // 1 不偷
+        int[][] dp = new int[n][2];
+        dp[0][0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            // 第i家，偷
+            dp[i][0] = dp[i - 1][1] + nums[i];
+            dp[i][1] = Math.max(dp[i - 1][0], dp[i - 1][1]);
+        }
+        return Math.max(dp[n - 1][0], dp[n - 1][1]);
+    }
+}
+```
+
+### [213.  打家劫舍 II](https://leetcode-cn.com/problems/house-robber-ii) :white_check_mark:
+
+> 环形偷，将环形拆开，分类讨论
+>
+> - 从 0 - (n - 2)
+> - 从1 -  (n - 1)
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        // 环形
+        int n = nums.length;
+        if (n == 1) {
+            return nums[0];
+        }
+        int startMax = rob(nums, 0, n - 2);
+        int secondMax = rob(nums, 1, n - 1);
+        return Math.max(startMax, secondMax);
+    }
+
+    private int rob(int[] nums, int left, int right) {
+        int n = right - left + 1;
+        int[][] dp = new int[n][2];
+        // 0 偷 1 不偷
+        dp[0][0] = nums[left];
+        for (int i = left + 1; i <= right; i++) {
+            dp[i - left][0] = dp[i - left - 1][1] + nums[i];
+            dp[i - left][1] = Math.max(dp[i - left - 1][0], dp[i - left - 1][1]);
+        }
+        return Math.max(dp[n - 1][0], dp[n - 1][1]);
+    }
+}
+```
+
+### [337. 打家劫舍 III](https://leetcode-cn.com/problems/house-robber-iii) :white_check_mark:
+
+> 树上偷
+>
+> ![image-20250428135446916](./assets/image-20250428135446916.png)
+>
+> $ array_i[2]=\left\{ \begin{array}{rcl}array_i[0]=array_{left}[1] + array_{right}[1] + root.val  && {偷}\\ array[1]=Max(array_{left}[0], array_{right}[1]) + Max(arry_{right}[0], aray_{right}[1]) &&{不偷}\end{array} \right. $
+
+```java
+class Solution {
+    public int rob(TreeNode root) {
+        int[] res = postOrder(root);
+        return Math.max(res[0], res[1]);
+    }
+
+    private int[] postOrder(TreeNode root) {
+        if (root == null) {
+            return new int[2];
+        }
+        // 0 偷  1 不偷
+        int[] left = postOrder(root.left);
+        int[] right = postOrder(root.right);
+        int[] arr = new int[2];
+        // 偷root.val情况
+        int rootVal = root.val + left[1] + right[1];
+        // 不偷roo.val情况
+        int notRootVal = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+        return new int[] {rootVal, notRootVal};
+    }
+}
+```
+
+### [121. 买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/) :white_check_mark:
+
+> 买卖股票有约束，根据题目意思，有以下两个约束条件：
+>
+> - 条件 1：你不能在买入股票前卖出股票；
+> - 条件 2：最多只允许完成一笔交易。
+>
+> 因此 **当天是否持股** 是一个很重要的因素，而当前是否持股和**昨天是否持股有关系**，所以也为时间序列模型
+>
+> <u>若是昨天不持股，今天持股，则和第一天持股一个道理，当前的金额数量为$-v[i]$</u> ，最后我们只需要返回最后一天不持股的最大金额数量即可。
+>
+> ![image-20250428135531292](./assets/image-20250428135531292.png)
+>
+> $ dp[i][2]=\left\{ \begin{array}{rcl}dp[i][0]= Max(dp[i-1][0], -v[i]])  && {持股}\\ dp[i][1]=Max(dp[i-1][0] + v[i], dp[i-1][1]) &&{不持股}\end{array} \right. $
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        // 0 持股 -prices[i]
+        // 1 不持股 + prices[i]
+        int[][] dp = new int[n][2];
+        dp[0][0] = -prices[0];
+        dp[0][1] = 0;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], -prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i], dp[i - 1][1]);
+        }
+        return dp[n - 1][1];
+    }
+}
+```
+
+### [剑指 Offer 63. 股票的最大利润](https://leetcode-cn.com/problems/gu-piao-de-zui-da-li-run-lcof/)
+
+> 和上题一致
+
+```java
+class Solution {
+    public int bestTiming(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        if (n == 0) {
+            return 0;
+        }
+        dp[0][0] = -prices[0];
+        
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], - prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i], dp[i - 1][1]);
+        }
+        return dp[n - 1][1];
+    }
+}
+```
+
+
+
+### [122. 买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/) :white_check_mark:
+
+> 一天最多支持一次交易 （售出、买入）
+>
+> $ dp[i][2]=\left\{ \begin{array}{rcl}dp[i][0]= Max(dp[i-1][0], dp[i-1][1]-v[i]])  && {持股}\\ dp[i][1]=Max(dp[i-1][0] + v[i], dp[i-1][1]) &&{不持股}\end{array} \right. $
+>
+> ![image-20250428140407235](./assets/image-20250428140407235.png)
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        // 0 持股 1 不持股
+        int[][] dp = new int[n][2];
+        dp[0][0] = -prices[0];
+        dp[0][1] = 0;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] - prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i], dp[i - 1][1]);
+        }
+        return dp[n - 1][1];
+    }
+}
+```
+
+
+
+### [123. 买卖股票的最佳时机 III](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iii/):white_check_mark:
+
+> 最高持有两股，分为四种状态，<u>注意第一只股票，售出之后，再买入，相当于直接-val[i];</u>
+>
+> 1. $ dp[i][j]=\left\{ \begin{array}{rcl} dp[i][0] = Max(dp[i-1][0], -val[i]) && {第i天，持第有1股的最大利润}\\ dp[i][1]=Max(dp[i-1][1], dp[i-1][0] + val[i]) && {第i天，售出第1股的最大收益} \\dp[i][2] = Max(dp[i-1][2], dp[i-1][1] - val[i] && {第i天，持有第2股的最大收益} \\dp[i][3] = Max(dp[i-1][3], dp[i-1][2] + val[i]) && {第i天，售出第2股的最大收益} \end{array} \right. $ 
+>
+> 最后的结果为$Max\{dp[N][i]\} (i = 0, 1, 2, 3)$
+>
+> ![image-20250428141147969](./assets/image-20250428141147969.png)
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        // 0 持有第一股
+        // 1 售出第一股
+        // 2 持有第二股
+        // 3 售出第二股
+        int[][] dp = new int[n][4];
+        dp[0][0] = -prices[0];
+        dp[0][1] = 0;
+        dp[0][2] = -prices[0];
+        dp[0][3] = 0;
+        for (int i = 1; i < n; i++) {
+            dp[i][0] =  Math.max(dp[i - 1][0], -prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i], dp[i - 1][1]);
+            dp[i][2] = Math.max(dp[i - 1][1] - prices[i], dp[i - 1][2]);
+            dp[i][3] = Math.max(dp[i - 1][2] + prices[i], dp[i - 1][3]);
+        }
+        int res = 0;
+        for (int i = 0; i < 4; i++) {
+            res = Math.max(dp[n - 1][i], res);
+        }
+        return res;
+    }
+}
+```
+
+
+
+### [188. 买卖股票的最佳时机 IV](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv/):white_check_mark:
+
+> 123题的通用版，偶数位为持有股票，奇数位为售出股票
+>
+> ![image-20210503202846471](https://i.loli.net/2021/05/03/bS3WCZPmtzVjnTQ.png)
+
+```java
+class Solution {
+    public int maxProfit(int k, int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2 * k];
+        // 偶数位为持有第k只股票 奇数位为售出当前股票
+        for (int i = 0; i < 2 * k; i++) {
+            if (i % 2 == 0) {
+                dp[0][i] = -prices[0];
+            }
+        }
+        
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < 2 * k; j++) {
+                // 奇数 售出
+                if (j % 2 == 1) {
+                    dp[i][j] = Math.max(dp[i - 1][j - 1] + prices[i], dp[i - 1][j]);
+                } else {
+                    if (j == 0) {
+                        dp[i][j] = Math.max(dp[i - 1][j], -prices[i]);
+                    }  else {
+                        dp[i][j] = Math.max(dp[i - 1][j - 1] - prices[i], dp[i - 1][j]);
+                    }
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 0; i < 2 * k; i++) {
+            res = Math.max(dp[n - 1][i], res);
+        }
+        return res;
+    }
+}
+```
+
+
+
+### [309. 最佳买卖股票时机含冷冻期](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/)
+
+> ![image-20250428145324741](./assets/image-20250428145324741.png)
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][3];
+        // 0 持股买入
+        // 1 不持股 卖出
+        // 2 冷冻
+        dp[0][0] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][2] - prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i], dp[i - 1][1]);
+            dp[i][2] = Math.max(dp[i - 1][1], dp[i - 1][2]);
+        }
+
+        int res = 0;
+        for (int i = 0; i < 3; i++) {
+            res = Math.max(dp[n - 1][i], res);
+        }
+        return res;
+    }
+}
+```
+
+
+
+### [714. 买卖股票的最佳时机含手续费](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
+
+> 122 一样的道理，只不过是增加了手续费
+>
+> ![image-20250428150429134](./assets/image-20250428150429134.png)
+
+```java
+class Solution {
+    public int maxProfit(int[] prices, int fee) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        // 0 买入
+        // 1 卖出
+        dp[0][0] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] - prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][0] + prices[i] - fee, dp[i - 1][1]);
+        }
+        return Math.max(dp[n - 1][0], dp[n - 1][1]);
+    }
+}
+```
+
+
+
+1. [376. 摆动序列](https://leetcode-cn.com/problems/wiggle-subsequence/)
+2. [487. 最大连续1的个数 II](https://leetcode-cn.com/problems/max-consecutive-ones-ii/):white_check_mark:
+3. [1186. 删除一次得到子数组最大和](https://leetcode-cn.com/problems/maximum-subarray-sum-with-one-deletion/):white_check_mark:
+

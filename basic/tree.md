@@ -169,6 +169,30 @@ class Solution {
 }
 
 // 复原版本
+class Solution {
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        dfs(root, sb, res);
+        return res;
+    }
+
+    private void dfs(TreeNode root, StringBuilder path, List<String> res) {
+        if (root == null) {
+            return;
+        }
+        int n = path.length();
+        path.append(root.val);
+        if (root.left == null && root.right == null) {
+            res.add(new String(path));
+        } else {
+            path.append("->");
+            dfs(root.left, path, res);
+            dfs(root.right, path, res);
+        }
+        path.setLength(n);
+    }
+}
 
 ```
 
