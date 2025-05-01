@@ -6,6 +6,105 @@
 
 
 
+## [46. 全排列](https://leetcode.cn/problems/permutations/)
+
+> 排列和组合不一样，排列只要位置不同计算一种结果
+
+```java
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        int n = nums.length;
+        boolean[] visited = new boolean[n];
+        List<Integer> path = new ArrayList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        backtrack(nums, visited, path, res);
+        return res;
+    }
+
+    private void backtrack(int[] nums, boolean[] visited, List<Integer> path, List<List<Integer>> res) {
+        if (path.size() == nums.length) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        
+        for (int i = 0; i < nums.length; i++) {
+            if (visited[i]) {
+                continue;
+            }
+            path.add(nums[i]);
+            visited[i] = true;
+            backtrack(nums, visited, path, res);
+            visited[i] = false;
+            path.remove(path.size() - 1);
+        }
+    }
+}
+```
+
+
+
+## [22. 括号生成](https://leetcode.cn/problems/generate-parentheses/)
+
+> 先生成左边，再生成右边
+
+```java
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        String path = "";
+        backtrack(0, 0, n, path, res);
+        return res;
+    }
+
+    private void backtrack(int left, int right, int max, String path, List<String> res) {
+      // 不执行撤销操作是因为当前层path固定，使用String，如果是StringBuilder因为可变，需要撤销
+        if (path.length() == 2 * max) {
+            res.add(path);
+            return;
+        }
+        if (left < max) {
+            backtrack(left + 1, right, max, path + "(", res);
+        }
+        if (right < left) {
+            backtrack(left, right + 1, max, path + ")", res);
+        }
+    }
+}
+
+// stringbuilder 类型
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        StringBuilder path = new StringBuilder();
+        backtrack(0, 0, n, path, res);
+        return res;
+    }
+
+    private void backtrack(int left, int right, int max, StringBuilder path, List<String> res) {
+        // 不执行撤销操作是因为当前层path固定，使用String，如果是StringBuilder因为可变，需要撤销
+        if (path.length() == 2 * max) {
+            res.add(new String(path));
+            return;
+        }
+        if (left < max) {
+            backtrack(left + 1, right, max, path.append("("), res);
+            path = path.deleteCharAt(path.length() - 1);
+
+        }
+        if (right < left) {
+            backtrack(left, right + 1, max, path.append(")"), res);
+            path = path.deleteCharAt(path.length() - 1);
+        }
+    }
+}
+```
+
+
+
+
+
+
+
 ## [17. 电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/)
 
 **题解：**
@@ -75,13 +174,15 @@ class Solution {
 
 
 
-### [842. 将数组拆分成斐波那契序列](https://leetcode.cn/problems/split-array-into-fibonacci-sequence/)
+## [842. 将数组拆分成斐波那契序列](https://leetcode.cn/problems/split-array-into-fibonacci-sequence/)
 
 > 这个其实是求字符串所有子串的变形，变形内容如下：
 >
 > - 求子串的过程中，判断是否是斐波那契数
 >
 > ```java
+> // 所有子串
+> // 直接字符串截断
 > private void backtrack(String num, int idx, List<String> tmp, List<List<String>> res) {
 >     if (idx == num.length()) {
 >         res.add(new ArrayList<>(tmp));
@@ -94,6 +195,8 @@ class Solution {
 >         tmp.remove(tmp.size() - 1);
 >     }
 > }
+> 
+> // 通过数字计算拼凑
 > private void backtrackToNumber(String num, int idx, List<Integer> tmp, List<List<Integer>> res) {
 >     if (idx == num.length()) {
 >         res.add(new ArrayList<>(tmp));
@@ -145,6 +248,100 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+
+
+
+## [93. 复原 IP 地址](https://leetcode.cn/problems/restore-ip-addresses/)
+
+> 回溯模板改造，需要判断，和LC842逻辑类似
+
+```java
+class Solution {
+    public List<String> restoreIpAddresses(String s) {
+        List<String> res = new ArrayList<>();
+        String path = "";
+        backtrack(s, 0, 0, path, res);
+        return res;
+    }
+
+    private void backtrack(String s, int idx, int segment, String path, List<String> res) {
+        // 添加元素
+        if (segment == 4 && s.length() == idx) {
+            res.add(path.substring(0, path.length() - 1));
+            return;
+        }
+        if (segment > 4 || idx >= s.length()) {
+            return;
+        }
+        // 处理当前层
+        // 元素长度最多为3
+        for (int i = 1; i <=3; i++) {
+            if (idx + i  > s.length()) {
+                break;
+            }
+            String cur = s.substring(idx, idx + i);
+            // 对当前元素校验
+            if (cur.length() > 1 && cur.startsWith("0")) {
+                break;
+            }
+            if (cur.length() >= 1&& Integer.parseInt(cur) >  255) {
+                break;
+            }
+            backtrack(s, idx + i, segment + 1, path + cur + ".", res);
+        }
+        
+    }
+}
+```
+
+
+
+### [79. 单词搜索](https://leetcode.cn/problems/word-search/)
+
+```java
+class Solution {
+    public boolean exist(char[][] board, String word) {
+        int row = board.length;
+        int col = board[0].length;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                boolean[][] visited = new boolean[row][col];
+                if (find(board, visited, i, j, word, 0)) {
+                    return true;
+                }                
+            }
+        }
+        return false;
+    }
+
+    private boolean find(char[][] board, boolean[][] visited, int i, int j, String word, int idx) {
+        if (idx == word.length()) {
+            return true;
+        }
+        if (!isPos(i, j, board.length, board[0].length) || visited[i][j] || word.charAt(idx) != board[i][j]) {
+            return false;
+        }
+        visited[i][j] = true;
+        int[][] steps = new int[][] {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+        boolean res = false;
+        for (int[] step : steps) {
+            int nI = i + step[0];
+            int nJ = j + step[1];
+           // 因为当前层已经判断了位置是否合法，所以不判断，避免误判导致数据丢失
+           // board[][] = [["a"]],  word = "a", 这里如果加了位置合法判断就永远无法进入下一层，就不会触发 true的条件 
+            boolean innerRes = find(board, visited, nI, nJ, word, idx + 1);
+            res |= innerRes;
+        }
+        visited[i][j] = false;
+        return res;
+
+    }
+
+    private boolean isPos(int i, int j, int col, int row) {
+        return (i >= 0 && i < col) && (j >= 0 && j < row);
     }
 }
 ```

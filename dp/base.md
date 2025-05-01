@@ -129,7 +129,7 @@ class Solution {
 }
 ```
 
-### [剑指 Offer 63. 股票的最大利润](https://leetcode-cn.com/problems/gu-piao-de-zui-da-li-run-lcof/)
+### [剑指 Offer 63. 股票的最大利润](https://leetcode-cn.com/problems/gu-piao-de-zui-da-li-run-lcof/) :white_check_mark:
 
 > 和上题一致
 
@@ -264,7 +264,7 @@ class Solution {
 
 
 
-### [309. 最佳买卖股票时机含冷冻期](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/)
+### [309. 最佳买卖股票时机含冷冻期](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/) :white_check_mark:
 
 > ![image-20250428145324741](./assets/image-20250428145324741.png)
 
@@ -294,7 +294,7 @@ class Solution {
 
 
 
-### [714. 买卖股票的最佳时机含手续费](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
+### [714. 买卖股票的最佳时机含手续费](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/) :white_check_mark:
 
 > 122 一样的道理，只不过是增加了手续费
 >
@@ -317,9 +317,377 @@ class Solution {
 }
 ```
 
-
-
 1. [376. 摆动序列](https://leetcode-cn.com/problems/wiggle-subsequence/)
 2. [487. 最大连续1的个数 II](https://leetcode-cn.com/problems/max-consecutive-ones-ii/):white_check_mark:
 3. [1186. 删除一次得到子数组最大和](https://leetcode-cn.com/problems/maximum-subarray-sum-with-one-deletion/):white_check_mark:
+
+
+
+## 时间序列增强版（子序列模型）
+
+> 子序列、子数组问题
+
+### [139. 单词拆分](https://leetcode.cn/problems/word-break/)
+
+> 子序列，当前位置与之前所有位置有关
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int n = s.length();
+        // 到第i个位置，s.substring(0, i + 1) 是否能够通过wordDict构成
+        boolean[] dp = new boolean[n + 1];
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                String sub = s.substring(j, i);
+                if (dp[j] && wordDict.contains(sub)) {
+                    dp[i] = true;
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+### [300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/)
+
+> 子序列问题
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int n = nums.length;
+        int[] dp = new int[n];
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] <= nums[j]) {
+                    continue;
+                }
+                dp[i] = Math.max(dp[i], dp[j] + 1);
+            }
+        }
+        return Arrays.stream(dp).max().getAsInt();
+    }
+}
+```
+
+
+
+### [322. 零钱兑换](https://leetcode.cn/problems/coin-change/)
+
+> 子序列的变化
+>
+> - 注意，dp[i] 默认为兑换不了，dp[0] 根据题意可设置为0，如果不设置的话，需要在for循环内设置
+>
+> 求最少的兑换结果
+
+```java
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        // 零钱i 最小的兑换结果
+        int[] dp = new int[amount + 1];
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int coin : coins) {
+                if (i - coin == 0) {
+                    dp[i] = 1;
+                }
+                if (i - coin < 0 || dp[i - coin] == Integer.MAX_VALUE) {
+                    continue;
+                }
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }   
+        return dp[amount] == Integer.MAX_VALUE ? -1 : dp[amount];
+    }
+}
+```
+
+
+
+### [53. 最大子数组和](https://leetcode.cn/problems/maximum-subarray/)
+
+> 子数组，出现异常情况，当前值作为新的dp[i]
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int n = nums.length;
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]);
+        }
+        return Arrays.stream(dp).max().getAsInt();
+    }
+}
+```
+
+
+
+### [152. 乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/)
+
+> 子数组 需要考虑负数情况
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int len = nums.length;
+        int[] max = new int[len];
+        int[] min = new int[len];
+        System.arraycopy(nums, 0, max, 0, len);
+        System.arraycopy(nums, 0, min, 0, len);
+        max[0] = nums[0];
+        min[0] = nums[0];
+        int res = nums[0];
+        for (int i = 1; i < len; i++) {
+            max[i] = Math.max(max[i], Math.max(max[i-1] * nums[i], min[i-1] * nums[i]));
+            min[i] = Math.min(min[i], Math.min(max[i-1] * nums[i], min[i-1] * nums[i]));
+            res = Math.max(res, max[i]);
+        }
+        return res;
+    }
+}
+```
+
+
+
+
+
+## 双序列
+
+> 给出两个序列$S$和$T$ (数组、字符串)，对它们两个搞事情
+>
+> - 编辑距离
+
+### [72. 编辑距离](https://leetcode.cn/problems/edit-distance/)
+
+> 1. 定义状态:
+>
+>    $dp[i][j]$ 表示A的前i个字符到B的前j个字符之间的编辑距离
+>
+> 2. 寻找状态转移方程
+>
+>    我觉得二维的状态, 画在纸上更加的简单明了
+>
+>    ![初始化](https://i.loli.net/2020/07/16/zEyUVD7BHSgZfmM.png)
+>
+>    ![过程说明](https://i.loli.net/2020/07/16/zXl6dEmFGOoWZLr.png)
+>
+>    ![运行部分结果](https://i.loli.net/2020/07/16/DaAS8LupU6gZxXk.png)
+>
+>    1. $dp[0][j]$表示一个空字符串A到B的前j个字符之间的距离
+>    2. $dp[i][0]$表示一个空字符串B到字符串A的前i个字符之间的距离
+>    3. $d[i,j]=min(d[i-1,j]+1 、d[i,j-1]+1、d[i-1,j-1]+temp)$ 这三个当中的最小值
+>       1. $str1[i] == str2[j]$，表示相同, 用temp记录它，为0。否则temp记为1
+>       2. $dp[i-1][j]$ 表示增加操作
+>       3. $dp[i][j-1]$表示删除操作
+>       4. $dp[i-1][j-1] + temp$表示替换操作
+>
+> 3. 边界值
+>
+>    1. $dp[i][0]$
+>    2. $dp[0][j]$
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int n = word1.length();
+        int m = word2.length();
+        int[][] dp = new int[n + 1][m + 1];
+        for (int i = 1 ; i <= n; i++) {
+            dp[i][0] = dp[i - 1][0] + 1; 
+        }
+        for (int i = 1; i <= m; i++) {
+            dp[0][i] = dp[0][i - 1] + 1;
+        }
+        int tmp = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    tmp = 0;
+                } else {
+                    tmp = 1;
+                }
+                dp[i][j] = Math.min(dp[i - 1][j - 1] + tmp, Math.min(dp[i - 1][j], dp[i][j - 1]) + 1);
+            }
+        }
+
+        return dp[n][m];
+        
+    }
+}
+```
+
+
+
+### [1143. 最长公共子序列](https://leetcode.cn/problems/longest-common-subsequence/)
+
+> 更上题一致，为了方便处理，同一添加""
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String s1, String s2) {
+        int n = s1.length(), m = s2.length();
+        s1 = " " + s1; s2 = " " + s2;
+        char[] cs1 = s1.toCharArray(), cs2 = s2.toCharArray();
+        int[][] f = new int[n + 1][m + 1]; 
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (cs1[i] == cs2[j]) f[i][j] = f[i -1][j - 1] + 1;    
+                else f[i][j] = Math.max(f[i - 1][j], f[i][j - 1]);
+            }
+        }
+        return f[n][m];
+    }
+}
+```
+
+### [718. 最长重复子数组](https://leetcode.cn/problems/maximum-length-of-repeated-subarray/)
+
+```java
+class Solution {
+    public int findLength(int[] nums1, int[] nums2) {
+        int len1 = nums1.length;
+        int len2 = nums2.length;
+        int[][] dp = new int[len1][len2];
+        // 
+        // if nums1[i] == nums2[j]  dp[i][j] = math.max(dp[i-1][j], dp[i-1][j-1] + 1, dp[i][j-1]);
+        int max = 0;
+        for (int i = 0; i < len1; i++) {
+            if (nums1[i] == nums2[0]) {
+                dp[i][0] = 1;
+                max = Math.max(max, dp[i][0]);
+            }
+        }
+
+        for (int i = 0; i < len2; i++) {
+            if (nums2[i] == nums1[0]) {
+                dp[0][i] = 1;
+                max = Math.max(max, dp[0][i]);
+            }
+        }
+
+        for (int i = 1; i < len1; i++) {
+            for (int j = 1; j < len2; j++) {
+                if (nums1[i] == nums2[j]) {
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                    max = Math.max(dp[i][j], max);
+                }
+            }
+        }
+        return max;
+    }
+}
+```
+
+
+
+## 区间序列
+
+
+
+## 背包
+
+### [518. 零钱兑换 II](https://leetcode.cn/problems/coin-change-ii/)
+
+> 求兑换的组合，改成背包模型
+
+```java
+class Solution {
+    public static int change(int amount, int[] coins) {
+        int n = coins.length;
+        int[][] dp = new int[n + 1][amount + 1];
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = 1;
+        }
+        for (int i = 1; i <= n; i++) {
+            int coin = coins[i - 1];
+            for (int j = 1; j <= amount; j++) {
+                //不选第i个硬币
+                dp[i][j] = dp[i - 1][j];
+                //选择第i个硬币
+                if (j >= coin) {
+                    dp[i][j] += dp[i][j - coin];
+                }
+            }
+        }
+        return dp[n][amount];
+    }
+}
+```
+
+
+
+## 二维数组
+
+### [221. 最大正方形](https://leetcode.cn/problems/maximal-square/)
+
+```java
+class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int[][] dp = new int[rows][cols];
+        int max = 0;
+        // dp[i][j] (i,j)为右下角是，能够成最大的边长
+        for (int i = 0; i < rows; i++) {
+            if (matrix[i][0] == '1') {
+                dp[i][0] = 1;
+                max = Math.max(dp[i][0], max);
+            }
+        }
+
+        for (int i = 0; i < cols; i++) {
+            if (matrix[0][i] == '1') {
+                dp[0][i] = 1;
+                max = Math.max(dp[0][i], max);
+            }
+            
+        }
+        for (int i = 1; i < rows; i++) {
+            for (int j = 1; j < cols; j++) {
+                if (matrix[i][j] == '1') {
+                    int temp = Math.min(dp[i-1][j], dp[i][j-1]);
+                    dp[i][j] = Math.min(temp, dp[i-1][j-1]) + 1;
+                    max = Math.max(dp[i][j], max);
+                }
+            }
+        }
+        return max * max;
+
+    }
+}
+```
+
+### [64. 最小路径和](https://leetcode.cn/problems/minimum-path-sum/)
+
+```java
+class Solution {
+    public int minPathSum(int[][] grid) {
+        int row = grid.length;
+        int col = grid[0].length;
+        int[][] dp = new int[row][col];
+        dp[0][0] = grid[0][0];
+        for (int i = 1; i < row; i++) {
+            dp[i][0] =  dp[i - 1][0] + grid[i][0];
+        }   
+
+        for (int i = 1; i < col; i++) {
+            dp[0][i] = dp[0][i - 1] + grid[0][i];
+        }
+
+        for (int i = 1; i < row; i++) {
+            for (int j = 1; j < col; j++) {
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[row - 1][col - 1];
+    }
+}
+```
 
