@@ -41,6 +41,41 @@ class Solution {
 }
 ```
 
+## [47. 全排列 II](https://leetcode.cn/problems/permutations-ii/)
+
+> 全排列，顺序不同即算一种，这次元素有重复，但是组合结果不能有重复，添加结果时，做去重
+
+```java
+class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<Integer> tmp = new ArrayList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        boolean[] visited = new boolean[nums.length];
+        backtrack(nums, visited, tmp, res);
+        return res;
+    }
+
+    private void backtrack(int[] nums, boolean[] visited, List<Integer> path, List<List<Integer>> res) {
+        // 去重
+        if (path.size() == nums.length && !res.contains(path)) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        
+        for (int i = 0; i < nums.length; i++) {
+            if (visited[i]) {
+                continue;
+            }
+            path.add(nums[i]);
+            visited[i] = true;
+            backtrack(nums, visited, path, res);
+            path.remove(path.size() - 1);
+            visited[i] = false;
+        }
+    }
+}
+```
+
 
 
 ## [22. 括号生成](https://leetcode.cn/problems/generate-parentheses/)
@@ -346,5 +381,42 @@ class Solution {
         return (i >= 0 && i < col) && (j >= 0 && j < row);
     }
 }
+```
+
+
+
+## [10. 正则表达式匹配](https://leetcode.cn/problems/regular-expression-matching/)
+
+> 使用回溯解决
+
+```java
+public class Solution {
+    public boolean isMatch(String s, String p) {
+        return backtrack(s, p, 0, 0);
+    }
+
+    private boolean backtrack(String s, String p, int i, int j) {
+        // 如果模式串匹配到末尾
+        if (j == p.length()) {
+            return i == s.length();  // 如果字符串也匹配完了，则返回true
+        }
+
+        // 判断当前字符是否匹配
+        boolean firstMatch = (i < s.length()) && (p.charAt(j) == s.charAt(i) || p.charAt(j) == '.');
+
+        // 处理 '*' 的情况
+        if (j + 1 < p.length() && p.charAt(j + 1) == '*') {
+            // 如果匹配成功或当前字符为'.'，尝试两种选择：
+            // 1. 不匹配当前字符，跳过模式串中的 '*' 和前面的字符
+            // 2. 匹配当前字符，然后继续处理剩下的字符串
+            return (backtrack(s, p, i, j + 2) || // 跳过当前字符和'*'
+                    (firstMatch && backtrack(s, p, i + 1, j)));  // 匹配当前字符并处理下一个字符
+        } else {
+            // 如果当前字符匹配并且模式串没有 '*'，继续递归
+            return firstMatch && backtrack(s, p, i + 1, j + 1);
+        }
+    }
+}
+
 ```
 

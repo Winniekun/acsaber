@@ -198,3 +198,37 @@ class Solution {
 
 
 
+### [LCR 153. 二叉树中和为目标值的路径](https://leetcode.cn/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/)
+
+> 按照前序遍历的思路，再引入回溯的思想
+>
+> - 注意：
+>   - 如果curNumer = target了，需要做的是将当前的结果添加到集合中，但是不能直接return，这样容易导致回溯逻辑被破坏
+
+```java
+class Solution {
+    private List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> pathTarget(TreeNode root, int target) {
+        preOrder(root, target, 0, new ArrayList<>());
+        return res;
+    }
+
+    private void preOrder(TreeNode root, int target, int curSum, List<Integer> path) {
+        if (root == null) {
+            return;
+        }
+        curSum += root.val;
+        path.add(root.val);
+        if (target == curSum && root.left == null && root.right == null) {
+            res.add(new ArrayList<>(path));
+        }
+        preOrder(root.left, target, curSum, path);
+        preOrder(root.right, target, curSum, path);
+        path.remove(path.size() - 1);
+        curSum -= root.val;
+    }
+}
+```
+
+
+

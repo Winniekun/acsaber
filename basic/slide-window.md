@@ -142,3 +142,32 @@ class Solution {
 }
 ```
 
+### [1208. 尽可能使字符串相等](https://leetcode.cn/problems/get-equal-substrings-within-budget/)
+
+```java
+public class Solution {
+    public int equalSubstring(String s, String t, int maxCost) {
+        int n = s.length();
+        int left = 0;  // 左指针
+        int totalCost = 0;  // 当前窗口的开销
+        int maxLength = 0;  // 最大的符合条件的子字符串长度
+
+        for (int right = 0; right < n; right++) {
+            // 计算当前字符的开销
+            totalCost += Math.abs(s.charAt(right) - t.charAt(right));
+
+            // 如果开销超过了最大预算，收缩窗口
+            while (totalCost > maxCost) {
+                totalCost -= Math.abs(s.charAt(left) - t.charAt(left));
+                left++;
+            }
+
+            // 更新最大长度
+            maxLength = Math.max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+}
+```
+
