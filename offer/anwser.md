@@ -288,33 +288,37 @@ public static TreeNode buildTree(int[] preorder, int[] inorder) {
 
 ## 面试题8： 二叉树的下一个节点
 
+```java
+```
+
+
+
 
 
 ## 面试题9： 两个栈实现队列
 
 ```java
-// 使用两个栈实现队列
-Deque<Integer> A, B;
-public interview9() {
-    A = new ArrayDeque<>();
-    B = new ArrayDeque<>();
-}
-public void appendTail(int value) {
-    A.push(value);
-}
-public int deleteHead() {
-    if (!B.isEmpty()) {
-        return B.removeLast();
+public class Solution {
+    Deque<Integer> stack1 = new ArrayDeque<Integer>();
+    Deque<Integer> stack2 = new ArrayDeque<Integer>();
+    
+    public void push(int node) {
+        stack1.push(node);
     }
-    // 表明两个栈都为空了, 所以没有能返回的值了
-    if (A.isEmpty()) {
-        return -1;
+    
+  	// 如果栈2内有元素，直接弹出 否则容易导致顺序错乱
+    // 1、2压入栈1，然后pop了1，此时栈2还存在2 如果这时栈1压入3然后再执行弹出操作，不判断stack2不为空的话，直接将3压入了栈2顶部了，
+    public int pop() {
+        if (!stack2.isEmpty()) {
+            return stack2.pop();
+        }
+        while (!stack1.isEmpty()) {
+            stack2.push(stack1.pop());
+        }
+        return stack2.pop();
     }
-    while (!A.isEmpty()) {
-        B.addLast(A.removeLast());
-    }
-    return B.removeLast();
 }
+
 ```
 
 
@@ -804,30 +808,29 @@ public ListNode mergeTwoLists(ListNode l1, ListNode l2){
 ## 面试题26：树的子结构
 
 ```java
-public boolean isSubStructure(TreeNode A, TreeNode B){
-    boolean res = false;
-    if(A!=null && B!=null){
-        if(A.val == B.val){
-            res = doesHaveTree2(A, B);
-        }if(!res){
-            res = isSubStructure(A.left, B);
-        }if(!res){
-            res = isSubStructure(A.right, B);
+class Solution {
+
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        if (A == null || B == null) {
+            if (A == null && B == null) {
+                return true;
+            }
+            return false;
         }
+        return dfs(A, B) || isSubStructure(A.left, B) || isSubStructure(A.right, B); 
     }
-    return res;
-}
-private boolean doesHaveTree2(TreeNode A, TreeNode B){
-    if(B == null) {
-        return true;
+    
+    private boolean dfs(TreeNode a, TreeNode b) {
+        if (b == null) {
+            return true;
+        }
+        if (a == null || a.val != b.val) {
+            return false;
+        }
+        boolean left = dfs(a.left, b.left);
+        boolean right = dfs(a.right, b.right);
+        return left && right;
     }
-    if(A == null){
-        return false;
-    }
-    if(A.val != B.val){
-        return false;
-    }
-    return doesHaveTree2(A.left, B.left) && doesHaveTree2(A.right, B.right);
 }
 ```
 
