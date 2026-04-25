@@ -477,3 +477,267 @@ class Solution {
 
 
 
+
+
+## 第 181 场双周赛
+
+3/4
+
+### [101048. 有效数字](https://leetcode.cn/problems/valid-digit-number/)
+
+```
+给你一个整数 n 和一个数字 x。
+
+如果一个数字满足以下条件，则认为它是 有效 的：
+
+它包含 至少一个 数字 x，并且
+它 不以 数字 x 开头。
+如果 n 是 有效 的，请返回 true，否则返回 false。
+```
+
+
+
+```java
+class Solution {
+    public boolean validDigit(int n, int x) {
+        String ns = String.valueOf(n);
+        char c = (char) ('0' + x);
+        return ns.indexOf(c) != -1 && ns.charAt(0) != c;
+    }
+}
+```
+
+
+
+### [101054. 比较双调部分的和](https://leetcode.cn/problems/compare-sums-of-bitonic-parts/)
+
+> 没啥好讲的，纯模拟题
+
+```
+给你一个长度为 n 的 双调 数组 nums。
+
+将数组分为 两 部分：
+
+递增部分：从下标 0 到峰值元素（包含）。
+递减部分：从峰值元素到下标 n - 1（包含）。
+峰值元素同时属于这两部分。
+
+返回：
+
+如果 递增 部分的和更大，返回 0。
+如果 递减 部分的和更大，返回 1。
+如果两部分的和 相等，返回 -1。
+注意：
+
+双调 数组是指在达到 单个峰值 元素之前 严格递增，然后 严格递减 的数组。
+如果一个数组的每个元素都 严格大于 它的 前一个 元素（如果存在），则称该数组是 严格递增 的。
+如果一个数组的每个元素都 严格小于 它的 前一个 元素（如果存在），则称该数组是 严格递减 的。
+
+```
+
+
+
+```
+class Solution {
+    public int compareBitonicSums(int[] nums) {
+        int n = nums.length;
+        int peak = 0;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > nums[peak]) {
+                peak = i;
+            }
+        }
+
+        long incSum = 0;
+        for (int i = 0; i <= peak; i++) {
+            incSum += nums[i];
+        }
+
+        long decSum = 0;
+        for (int i = peak; i < n; i++) {
+            decSum += nums[i];
+        }
+
+        if (incSum > decSum) {
+            return 0;
+        }
+        if (incSum < decSum) {
+            return 1;
+        }
+        return -1;
+    }
+}
+```
+
+
+
+
+
+### [101041. 统计节点和为偶数的连通子图](https://leetcode.cn/problems/count-connected-subgraphs-with-even-node-sum/)
+
+```
+给你一个无向图，有 n 个节点，编号从 0 到 n - 1。节点 i 的 值 为 nums[i]，可以是 0 或 1。图的边由一个二维数组 edges 给出，其中 edges[i] = [ui, vi] 表示节点 ui 和节点 vi 之间的一条边。
+
+对于图中节点的 非空子集 s，我们考虑由 s 生成的 诱导子图 如下：
+
+我们只保留 s 中的节点。
+我们只保留两个端点都在 s 中的边。
+返回一个整数，表示图中满足以下条件的节点的 非空 子集 s 的数量：
+
+s 的 诱导子图 是 连通的。
+s 中节点 值 的 总和 是 偶数。
+
+```
+
+>  找子集并且构造的图也是联通图 & 节点值之和为偶数
+>
+> - 枚举所有子集
+>   - 是否联通
+>   - 节点值之和是否为偶数
+
+
+
+#### 如何快速枚举所有子集
+
+假设 `n = 4`，节点是：
+
+```
+0, 1, 2, 3
+```
+
+那么一个 `mask` 有 4 位：
+
+```
+0001 -> 选了节点 0
+0010 -> 选了节点 1
+0100 -> 选了节点 2
+1000 -> 选了节点 3
+```
+
+组合起来：
+
+```
+0011 -> 选了节点 0,1
+0101 -> 选了节点 0,2
+1111 -> 选了节点 0,1,2,3
+```
+
+所以枚举所有非空子集：
+
+```
+for (int mask = 1; mask < (1 << n); mask++) {
+    // mask 表示一个非空子集
+}
+```
+
+举例：mask = `0101` 代表选择了i = 0、2
+
+```
+i = 0：0101 >> 0 = 0101，最后一位是 1，选中
+i = 1：0101 >> 1 = 0010，最后一位是 0，没选中
+i = 2：0101 >> 2 = 0001，最后一位是 1，选中
+i = 3：0101 >> 3 = 0000，最后一位是 0，没选中
+```
+
+对应代码：
+
+```
+for (int mask = 1; mask < (1 << n); mask++) {
+    System.out.print("当前子集：");
+
+    for (int i = 0; i < n; i++) {
+        if (((mask >> i) & 1) == 1) {
+            System.out.print(i + " ");
+        }
+    }
+
+    System.out.println();
+}
+```
+
+
+
+
+
+#### 完整代码
+
+```
+class Solution {
+    public int evenSumSubgraphs(int[] nums, int[][] edges) {
+        int n = nums.length;
+        List<Integer>[] graph = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            graph[u].add(v);
+            graph[v].add(u);
+        }
+
+        int ans = 0;
+        int total = 1 << n;
+        for (int mask = 1; mask < total; mask++) {
+            if (!isEvenSum(mask, nums)) {
+                continue;
+            }
+
+            if (isConnected(mask, graph, n)) {
+                ans++;
+            }
+        }
+
+        return ans;
+    }
+
+    private boolean isEvenSum(int mask, int[] nums) {
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (((mask >> i) & 1) == 1) {
+                sum += nums[i];
+            }
+        }
+
+        return sum % 2 == 0;
+    }
+
+    private boolean isConnected(int mask, List<Integer>[] graph, int n) {
+        int start = -1;
+        for (int i = 0; i < n; i++) {
+            if (((mask >> i) & 1) == 1) {
+                start = i;
+                break;
+            }
+        }
+
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(start);
+        visited[start] = true;
+
+        int count = 0;
+
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            count++;
+
+            for (int next : graph[cur]) {
+                if (((mask >> next) & 1) == 0) {
+                    continue;
+                }
+
+                if (visited[next]) {
+                    continue;
+                }
+
+                visited[next] = true;
+                queue.offer(next);
+            }
+        }
+
+        return count == Integer.bitCount(mask);
+    }
+}
+```
+
