@@ -741,3 +741,182 @@ class Solution {
 }
 ```
 
+
+
+
+
+## 499双周赛
+
+### Q1. 数组中的有效元素
+
+```
+给你一个整数数组 nums。 如果元素 nums[i] 满足以下 至少一个 条件，则认为它是 有效 元素： 它 严格大于 其左侧的所有元素。 它 严格大于 其右侧的所有元素。 第一个元素和最后一个元素始终有效。 返回所有有效元素组成的数组，顺序与它们在 nums 中出现的顺序相同。
+```
+
+**思路：**可以预处理每个位置右侧最大值，左侧最大值边遍历边维护。
+
+```java
+class Solution {
+    public List<Integer> validElements(int[] nums) {
+        int n = nums.length;
+        List<Integer> ans = new ArrayList<>();
+
+        if (n == 0) {
+            return ans;
+        }
+
+        int[] rightMax = new int[n];
+        rightMax[n - 1] = Integer.MIN_VALUE;
+
+        for (int i = n - 2; i >= 0; i--) {
+            rightMax[i] = Math.max(rightMax[i + 1], nums[i + 1]);
+        }
+
+        int leftMax = Integer.MIN_VALUE;
+
+        for (int i = 0; i < n; i++) {
+            if (i == 0 || i == n - 1 || nums[i] > leftMax || nums[i] > rightMax[i]) {
+                ans.add(nums[i]);
+            }
+
+            leftMax = Math.max(leftMax, nums[i]);
+        }
+
+        return ans;
+    }
+}
+```
+
+
+
+### Q2. 按频率对元音排序
+
+```
+给你一个由小写英文字母组成的字符串 s。
+仅重新排列字符串中的 元音字母，使它们按照出现频率的 非递增 顺序排列。
+
+如果多个元音字母的 出现频率 相同，则按照它们在 s 中 首次出现 的位置排序。
+
+返回修改后的字符串。
+
+元音字母为 'a'、'e'、'i'、'o' 和 'u'。
+
+字母的 出现频率 是指它在字符串中出现的次数。
+```
+
+
+
+**思路：** 很直白，按照要求，对元音字符排序得到sortStr，然后遍历字符串，把属于元音的位置，按照sortStr一个一个回填进去就行了
+
+```java
+class Solution {
+    public String sortVowelsByFrequency(String s) {
+        int n = s.length();
+
+        Map<Character, Integer> count = new HashMap<>();
+        Map<Character, Integer> firstIndex = new HashMap<>();
+
+        // 统计元音频率和首次出现位置
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+
+            if (isVowel(c)) {
+                count.put(c, count.getOrDefault(c, 0) + 1);
+                firstIndex.putIfAbsent(c, i);
+            }
+        }
+
+        List<Character> vowels = new ArrayList<>(count.keySet());
+
+        vowels.sort((a, b) -> {
+            int ca = count.get(a);
+            int cb = count.get(b);
+
+            if (ca != cb) {
+                return cb - ca; // 频率非递增
+            }
+
+            return firstIndex.get(a) - firstIndex.get(b); // 首次出现位置升序
+        });
+
+        StringBuilder orderedVowels = new StringBuilder();
+
+        // 按排序后的元音种类展开
+        for (char c : vowels) {
+            int freq = count.get(c);
+            for (int i = 0; i < freq; i++) {
+                orderedVowels.append(c);
+            }
+        }
+
+        StringBuilder ans = new StringBuilder(s);
+        int idx = 0;
+
+        // 填回原来的元音位置
+        for (int i = 0; i < n; i++) {
+            if (isVowel(ans.charAt(i))) {
+                ans.setCharAt(i, orderedVowels.charAt(idx++));
+            }
+        }
+
+        return ans.toString();
+    }
+
+    private boolean isVowel(char c) {
+        return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+    }
+}
+```
+
+
+
+### Q3. 使数组非递减需要的最小累计值
+
+```
+给你一个长度为 n 的整数数组 nums。
+一次操作中，你可以选择任意一个 子数组 nums[l..r]，并将该 子数组 中的每个元素都增加 x，其中 x 可以是任意正整数。
+
+返回使数组变为 非递减 所需的所有操作中，所选 x 的值之和可能达到的 最小值。
+
+如果对于所有 0 <= i < n - 1，都有 nums[i] <= nums[i + 1]，则称数组是 非递减 的。
+
+子数组 是数组中一个连续、 非空 的元素序列。
+```
+
+
+
+**思路：**
+
+```
+add[i] + nums[i] <= nums[i + 1] + add[i + 1]
+add[i + 1] >= add[i] + nums[i] - nums[i + 1];
+
+贪心：
+add[i] = Math.max(0, add[i - 1] + nums[i - 1] - nums[i])
+```
+
+
+
+```java
+class Solution {
+    public long minimumCost(int[] nums) {
+        int[] dravonikel = nums;
+
+        long ans = 0;
+        long add = 0;
+
+        for (int i = 1; i < nums.length; i++) {
+            long nextAdd = Math.max(0L, add + nums[i - 1] - nums[i]);
+
+            if (nextAdd > add) {
+                ans += nextAdd - add;
+            }
+
+            add = nextAdd;
+        }
+
+        return ans;
+    }
+}
+```
+
