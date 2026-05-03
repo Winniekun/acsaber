@@ -745,7 +745,7 @@ class Solution {
 
 
 
-## 499双周赛
+## 499周赛
 
 ### Q1. 数组中的有效元素
 
@@ -919,4 +919,199 @@ class Solution {
     }
 }
 ```
+
+
+
+
+
+## 500周赛
+
+
+
+### [Q1. 统计下标的相反奇偶性得分](https://leetcode.cn/contest/weekly-contest-500/problems/count-indices-with-opposite-parity/)
+
+```
+给你一个长度为 n 的整数数组 nums。
+
+下标 i 的 分数 定义为满足以下条件的下标 j 的数量：
+
+i < j < n，并且
+nums[i] 和 nums[j] 的奇偶性不同（一个为偶数，另一个为奇数）。
+返回一个长度为 n 的整数数组 answer，其中 answer[i] 表示下标 i 的分数。
+```
+
+
+
+```
+class Solution {
+    public int[] countOppositeParity(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        int odd = 0;
+        int even = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            if (nums[i] % 2 == 0) {
+                res[i] = odd;
+                even++;
+            } else {
+                res[i] = even;
+                odd++;
+            }
+        }
+        return res;
+    }
+}
+```
+
+
+
+### [Q2. 区间内的质数和](https://leetcode.cn/contest/weekly-contest-500/problems/sum-of-primes-between-number-and-its-reverse/)
+
+```
+给你一个整数 n。
+令 r 为将 n 的数字反转后得到的整数。
+
+返回从 min(n, r) 到 max(n, r)（包含两端）之间所有质数的总和。
+
+质数是指大于 1，且只有 1 和它本身两个因数的自然数。
+```
+
+
+
+```
+class Solution {
+    public int sumOfPrimesInRange(int n) {
+        int t = n;
+        int r = revere(n);
+        int left = Math.min(r, t);
+        int right = Math.max(r, t);
+        int sum = 0;
+        for (int i = left; i <= right; i++) {
+            if (isPrime(i)) {
+                sum += i;
+            }
+        }
+        return sum;
+    }
+
+    private int revere(int x) {
+        int res = 0;
+        while (x > 0) {
+            res = res  * 10 + x % 10;
+            x /= 10;
+        }
+        return res;
+    }
+
+    private boolean isPrime(int x) {
+        if (x <= 1) {
+            return false;
+        }
+        if (x == 2) {
+            return true;
+        }
+        if (x % 2 == 0) {
+            return false;
+        }
+
+        for (int i = 3; i * i <= x; i += 2) {
+            if (x % i == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+```
+
+
+
+### [Q3. 在下标间移动的最小代价](https://leetcode.cn/contest/weekly-contest-500/problems/minimum-cost-to-move-between-indices/)
+
+```
+给你一个整数数组 nums，nums 是 严格递增 的。
+
+对于每个下标 x，设 closest(x) 为使得 abs(nums[x] - nums[y]) 最小化 的 相邻 下标。如果两个 相邻 下标的差值相同，则选择 较小 的下标。
+
+从任意下标 x 出发，你可以通过以下两种方式移动：
+
+移动到任意下标 y，代价为 abs(nums[x] - nums[y])，或者
+移动到 closest(x)，代价为 1。
+同时给你一个二维整数数组 queries，其中每个 queries[i] = [li, ri]。
+
+对于每个查询，计算从下标 li 移动到下标 ri 的 最小总代价。
+
+返回一个整数数组 ans，其中 ans[i] 是第 i 个查询的答案。
+
+如果一个数组的每个元素都 严格大于 其前一个元素，则称该数组为 严格递增 的。
+
+两个值 x 和 y 之间的 绝对差 定义为 abs(x - y)。
+```
+
+
+
+```
+class Solution {
+    public int[] minCost(int[] nums, int[][] queries) {
+        int n = nums.length;
+        int[] preL = new int[n];
+        int[] preR = new int[n];
+        int[] res = new int[queries.length];
+        for (int i = 0; i < n - 1; i++) {
+            int cost = nums[i + 1] - nums[i];
+            if (closest(nums, i) == i + 1) {
+                cost = 1;
+            }
+            preR[i + 1] = preR[i] + cost;
+        }
+
+        for (int i = 1; i < n; i++) {
+            int cost = nums[i] - nums[i - 1];
+            if (closest(nums, i) == i - 1) {
+                cost = 1;
+            }
+            preL[i] = preL[i - 1] + cost;
+        }
+
+        for (int i = 0; i < queries.length; i++) {
+            int qL = queries[i][0];
+            int qR = queries[i][1];
+
+            if (qL < qR) {
+                res[i] = preR[qR] - preR[qL];
+                continue;
+            } 
+            res[i] = preL[qL] - preL[qR];
+        }
+        return res;
+        
+    }
+
+    private int closest(int[] nums, int i) {
+        int n = nums.length;
+
+        if (i == 0) {
+            return 1;
+        }
+
+        if (i == n - 1) {
+            return n - 2;
+        }
+
+        int l = nums[i] - nums[i - 1];
+        int r = nums[i + 1] - nums[i];
+
+        if (l <= r) {
+            return i - 1;
+        }
+
+        return i + 1;
+    }
+}
+```
+
+
+
+
 
